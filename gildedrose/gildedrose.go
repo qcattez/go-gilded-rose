@@ -1,57 +1,33 @@
 package gildedrose
 
-type Item struct {
-	Name            string
-	SellIn, Quality int
-}
+import (
+	"github.com/emilybache/gildedrose-refactoring-kata/gildedrose/goblin"
+	"github.com/emilybache/gildedrose-refactoring-kata/gildedrose/shop"
+)
 
-const MinimumQuality = 0
-const MaximumQuality = 50
-
-func decreaseQualityBy(item *Item, quantity int) {
-	item.Quality -= quantity
-
-	if item.SellIn < 0 {
-		item.Quality -= quantity
-	}
-
-	if item.Quality < MinimumQuality {
-		item.Quality = MinimumQuality
+func GetShopItemFromGoblinItem(item *goblin.Item) *shop.Item {
+	return &shop.Item{
+		Name:    item.Name,
+		SellIn:  item.SellIn,
+		Quality: item.Quality,
 	}
 }
 
-func increaseQualityBy(item *Item, quantity int) {
-	item.Quality += quantity
-
-	if item.SellIn < 0 {
-		item.Quality += quantity
-	}
-
-	if item.Quality > MaximumQuality {
-		item.Quality = MaximumQuality
+func GetGoblinItemFromShopItem(item *shop.Item) *goblin.Item {
+	return &goblin.Item{
+		Name:    item.Name,
+		SellIn:  item.SellIn,
+		Quality: item.Quality,
 	}
 }
 
-type shopItem interface {
-	updateQuality()
-}
-
-func newShopItem(item *Item) shopItem {
-	if item.Name == "Sulfuras, Hand of Ragnaros" {
-		return newLegendary(item)
-	}
-	if item.Name == "Aged Brie" {
-		return newAgedBrie(item)
-	}
-	if item.Name == "Backstage passes to a TAFKAL80ETC concert" {
-		return newBackstagePass(item)
-	}
-	return newCommon(item)
-}
-
-func UpdateQuality(items []*Item) {
+func UpdateQuality(items []*goblin.Item) {
 	for i := 0; i < len(items); i++ {
-		shopItem := newShopItem(items[i])
-		shopItem.updateQuality()
+		shopItem := GetShopItemFromGoblinItem(items[i])
+
+		updatableItem := shop.NewUpdatableItem(shopItem)
+		updatableItem.UpdateQuality()
+
+		*items[i] = *GetGoblinItemFromShopItem(updatableItem.ToItem())
 	}
 }
